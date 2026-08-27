@@ -4,8 +4,8 @@
  * Vercel serverless entry for Laravel.
  *
  * Redirects the writable Laravel storage paths to the ephemeral /tmp
- * directory, copies the seeded SQLite database into /tmp so reads (and
- * short-lived writes) work on the serverless runtime, then boots Laravel.
+ * directory, then boots Laravel. The persistent database (Postgres on
+ * Neon) is configured via environment variables.
  */
 
 $tmp = sys_get_temp_dir() . '/laravel';
@@ -17,18 +17,6 @@ foreach (['framework', 'framework/cache', 'framework/data', 'framework/sessions'
     if (!is_dir($tmp . '/' . $sub)) {
         @mkdir($tmp . '/' . $sub, 0777, true);
     }
-}
-
-// Copy the committed SQLite database into writable /tmp so the store loads.
-$dbSource = __DIR__ . '/../database/database.sqlite';
-$dbDest = $tmp . '/database.sqlite';
-if (file_exists($dbSource) && !file_exists($dbDest)) {
-    @copy($dbSource, $dbDest);
-}
-if (file_exists($dbDest)) {
-    putenv('DB_DATABASE=' . $dbDest);
-    $_ENV['DB_DATABASE'] = $dbDest;
-    $_SERVER['DB_DATABASE'] = $dbDest;
 }
 
 // Serve real static assets (images, fonts, compiled build) directly.
