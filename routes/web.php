@@ -22,8 +22,23 @@ Route::get('/__setup__', function (\Illuminate\Http\Request $request) {
     if ($request->query('key') !== env('SETUP_KEY')) {
         abort(403);
     }
-    \Illuminate\Support\Facades\Artisan::call('migrate:fresh --seed --force');
-    return response(\Illuminate\Support\Facades\Artisan::output());
+    $out = [];
+    $out[] = 'exts: pdo=' . (extension_loaded('pdo_pgsql')?1:0) . ' pgsql=' . (extension_loaded('pgsql')?1:0);
+    $out[] = 'DB_CONNECTION=' . env('DB_CONNECTION');
+    $out[] = 'DB_HOST=' . env('DB_HOST');
+    $out[] = 'DB_PORT=' . env('DB_PORT');
+    $out[] = 'DB_DATABASE=' . env('DB_DATABASE');
+    $out[] = 'DB_USERNAME=' . env('DB_USERNAME');
+    $out[] = 'has URL=' . (env('DB_URL')?'yes':'no');
+    $out[] = 'SSLMODE=' . env('DB_SSLMODE');
+    try {
+        \Illuminate\Support\Facades\Artisan::call('migrate:fresh --seed --force');
+        $out[] = 'ARTISAN OUTPUT:';
+        $out[] = \Illuminate\Support\Facades\Artisan::output();
+    } catch (\Throwable $e) {
+        $out[] = 'ARTISAN EXCEPTION: ' . get_class($e) . ': ' . $e->getMessage();
+    }
+    return response(implode("\n", $out));
 });
 
 // Language Switcher Route
