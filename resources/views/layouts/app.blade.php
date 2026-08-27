@@ -59,31 +59,33 @@
     </script>
 
     <script>
-        window.addToCart = async function (productId, qty, dispatch) {
-            const token = document.querySelector('meta[name="csrf-token"]');
-            try {
-                const r = await fetch('{{ route('cart.add') }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': token ? token.content : ''
-                    },
-                    body: JSON.stringify({ product_id: productId, quantity: qty })
-                });
-                let res = null;
-                try { res = JSON.parse(await r.text()); } catch (e) {}
-                if (res && res.success && res.drawer) {
-                    dispatch('cart-updated', { count: res.drawer.count });
-                    dispatch('toast', { message: res.message, type: 'success' });
-                } else if (res && res.message) {
-                    dispatch('toast', { message: res.message, type: 'error' });
-                } else {
-                    dispatch('toast', { message: 'Could not add item. Please try again.', type: 'error' });
-                }
-            } catch (e) {
-                dispatch('toast', { message: 'Network error. Please try again.', type: 'error' });
-            }
+        window.addToCart = function (productId, qty, dispatch) {
+            return new Promise(function (resolve) {
+                var token = document.querySelector('meta[name="csrf-token"]');
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', '{{ route('cart.add') }}', true);
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                xhr.setRequestHeader('Accept', 'application/json');
+                xhr.setRequestHeader('X-CSRF-TOKEN', token ? token.content : '');
+                xhr.onload = function () {
+                    var res = null;
+                    try { res = JSON.parse(xhr.responseText || '{}'); } catch (e) { res = null; }
+                    if (res && res.success && res.drawer) {
+                        dispatch('cart-updated', { count: res.drawer.count });
+                        dispatch('toast', { message: res.message, type: 'success' });
+                    } else if (res && res.message) {
+                        dispatch('toast', { message: res.message, type: 'error' });
+                    } else {
+                        dispatch('toast', { message: 'Could not add item. Please try again.', type: 'error' });
+                    }
+                    resolve();
+                };
+                xhr.onerror = function () {
+                    dispatch('toast', { message: 'Network error. Please try again.', type: 'error' });
+                    resolve();
+                };
+                xhr.send(JSON.stringify({ product_id: productId, quantity: qty }));
+            });
         };
     </script>
 
