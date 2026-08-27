@@ -24,10 +24,11 @@
                      fetch('{{ route('cart.drawer') }}')
                          .then(res => res.json())
                          .then(data => {
-                             this.cartData = data;
+                             this.cartData = data || { items: [], count: 0 };
                              this.loading = false;
-                             $dispatch('cart-updated', { count: data.count });
-                         });
+                             $dispatch('cart-updated', { count: data.count || 0 });
+                         })
+                         .catch(() => { this.loading = false; });
                  },
                  updateQty(id, qty) {
                      fetch('/cart/update/' + id, {

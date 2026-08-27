@@ -176,17 +176,7 @@
                                     <span class="text-xs text-gray-400 line-through ml-1.5">${{ number_format($product->compare_at_price, 2) }}</span>
                                 @endif
                             </div>
-                            <button @click="
-                                adding = true;
-                                fetch('{{ route('cart.add') }}', {
-                                    method: 'POST',
-                                    headers: {'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}'},
-                                    body: JSON.stringify({ product_id: {{ $product->id }}, quantity: 1 })
-                                }).then(r => r.json()).then(res => {
-                                    adding = false;
-                                    $dispatch('cart-updated', { count: res.drawer.count });
-                                    $dispatch('toast', { message: res.message, type: 'success' });
-                                });"
+                            <button @click="adding = true; addToCart({{ $product->id }}, 1, $dispatch).then(() => { adding = false; });"
                                 class="px-3.5 py-2 rounded-xl bg-amber-500/10 text-amber-500 hover:bg-amber-500 hover:text-slate-950 font-bold text-xs transition flex items-center gap-1.5">
                                 <i class="fa-solid fa-cart-plus" x-show="!adding"></i>
                                 <span x-text="adding ? '...' : '{{ __('app.add_to_cart') }}'"></span>

@@ -121,17 +121,7 @@
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <button @click="
-                            adding = true;
-                            fetch('{{ route('cart.add') }}', {
-                                method: 'POST',
-                                headers: {'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}'},
-                                body: JSON.stringify({ product_id: {{ $product->id }}, quantity: qty })
-                            }).then(r => r.json()).then(res => {
-                                adding = false;
-                                $dispatch('cart-updated', { count: res.drawer.count });
-                                $dispatch('toast', { message: res.message, type: 'success' });
-                            });"
+                        <button @click="adding = true; addToCart({{ $product->id }}, qty, $dispatch).then(() => { adding = false; });"
                             class="py-4 px-6 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-extrabold text-xs uppercase tracking-wider hover:from-amber-400 hover:to-amber-500 transition shadow-xl shadow-amber-500/20 flex items-center justify-center gap-2">
                             <i class="fa-solid fa-bag-shopping text-base" x-show="!adding"></i>
                             <span x-text="adding ? 'Adding...' : '{{ __('app.add_to_cart') }}'"></span>

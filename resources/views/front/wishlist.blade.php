@@ -48,17 +48,7 @@
 
                                 <div class="flex items-center justify-between mt-4 pt-3 border-t border-gray-200 dark:border-gray-800">
                                     <span class="text-lg font-black text-amber-500">${{ number_format($wish->product->price, 2) }}</span>
-                                    <button @click="
-                                        adding = true;
-                                        fetch('{{ route('cart.add') }}', {
-                                            method: 'POST',
-                                            headers: {'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}'},
-                                            body: JSON.stringify({ product_id: {{ $wish->product->id }}, quantity: 1 })
-                                        }).then(r => r.json()).then(res => {
-                                            adding = false;
-                                            $dispatch('cart-updated', { count: res.drawer.count });
-                                            $dispatch('toast', { message: res.message, type: 'success' });
-                                        });"
+                                    <button @click="adding = true; addToCart({{ $wish->product->id }}, 1, $dispatch).then(() => { adding = false; });"
                                         class="px-3.5 py-2 rounded-xl bg-amber-500/10 text-amber-500 hover:bg-amber-500 hover:text-slate-950 font-bold text-xs transition">
                                         <span x-text="adding ? '...' : '{{ __('app.add_to_cart') }}'"></span>
                                     </button>

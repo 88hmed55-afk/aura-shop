@@ -58,6 +58,35 @@
         }
     </script>
 
+    <script>
+        window.addToCart = async function (productId, qty, dispatch) {
+            const token = document.querySelector('meta[name="csrf-token"]');
+            try {
+                const r = await fetch('{{ route('cart.add') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': token ? token.content : ''
+                    },
+                    body: JSON.stringify({ product_id: productId, quantity: qty })
+                });
+                let res = null;
+                try { res = JSON.parse(await r.text()); } catch (e) {}
+                if (res && res.success && res.drawer) {
+                    dispatch('cart-updated', { count: res.drawer.count });
+                    dispatch('toast', { message: res.message, type: 'success' });
+                } else if (res && res.message) {
+                    dispatch('toast', { message: res.message, type: 'error' });
+                } else {
+                    dispatch('toast', { message: 'Could not add item. Please try again.', type: 'error' });
+                }
+            } catch (e) {
+                dispatch('toast', { message: 'Network error. Please try again.', type: 'error' });
+            }
+        };
+    </script>
+
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
