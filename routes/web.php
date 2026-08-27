@@ -17,31 +17,6 @@ use App\Http\Controllers\Admin\AdminCouponController;
 use App\Http\Controllers\Admin\AdminCustomerController;
 use App\Http\Controllers\Admin\AdminReportController;
 
-// TEMP setup route (remove after one-time DB provisioning)
-Route::get('/__setup__', function (\Illuminate\Http\Request $request) {
-    if ($request->query('key') !== env('SETUP_KEY')) {
-        abort(403);
-    }
-    $out = [];
-    $run = $request->query('run', 'migrate');
-    try {
-        if ($run === 'migrate') {
-            \Illuminate\Support\Facades\Artisan::call('migrate --force');
-        } elseif ($run === 'fresh') {
-            \Illuminate\Support\Facades\Artisan::call('migrate:fresh --force');
-        } elseif ($run === 'seed') {
-            \Illuminate\Support\Facades\Artisan::call('db:seed --force');
-        } else {
-            $out[] = 'unknown run mode';
-        }
-        $out[] = 'ARTISAN OUTPUT:';
-        $out[] = \Illuminate\Support\Facades\Artisan::output();
-    } catch (\Throwable $e) {
-        $out[] = 'ARTISAN EXCEPTION: ' . get_class($e) . ': ' . $e->getMessage();
-    }
-    return response(implode("\n", $out));
-});
-
 // Language Switcher Route
 Route::get('/lang/{locale}', function ($locale) {
     if (in_array($locale, ['en', 'ar'])) {

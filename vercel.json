@@ -7,11 +7,6 @@
     "routes": [
         { "src": "/(.*)", "dest": "/api/index.php" }
     ],
-    "functions": {
-        "api/index.php": {
-            "maxDuration": 60
-        }
-    },
     "env": {
         "APP_ENV": "production",
         "APP_DEBUG": "false",
