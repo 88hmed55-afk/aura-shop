@@ -20,7 +20,7 @@ foreach (['framework', 'framework/cache', 'framework/data', 'framework/sessions'
 }
 
 // Copy the committed SQLite database into writable /tmp so the store loads.
-$dbSource = __DIR__ . '/database/database.sqlite';
+$dbSource = __DIR__ . '/../database/database.sqlite';
 $dbDest = $tmp . '/database.sqlite';
 if (file_exists($dbSource) && !file_exists($dbDest)) {
     @copy($dbSource, $dbDest);
@@ -33,7 +33,7 @@ if (file_exists($dbDest)) {
 
 // Serve real static assets (images, fonts, compiled build) directly.
 $uri = urldecode(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '/');
-if ($uri !== '/' && file_exists($file = __DIR__ . '/public' . $uri) && !is_dir($file)) {
+if ($uri !== '/' && file_exists($file = __DIR__ . '/../public' . $uri) && !is_dir($file)) {
     if (strtolower(pathinfo($file, PATHINFO_EXTENSION)) === 'php') {
         require $file;
     } else {
@@ -43,10 +43,10 @@ if ($uri !== '/' && file_exists($file = __DIR__ . '/public' . $uri) && !is_dir($
     return;
 }
 
-require __DIR__ . '/vendor/autoload.php';
+require __DIR__ . '/../vendor/autoload.php';
 
 /** @var \Illuminate\Foundation\Application $app */
-$app = require __DIR__ . '/bootstrap/app.php';
+$app = require __DIR__ . '/../bootstrap/app.php';
 
 // Point every framework storage path at the writable /tmp directory.
 $app->useStoragePath($tmp);
