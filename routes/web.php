@@ -23,10 +23,17 @@ Route::get('/__setup__', function (\Illuminate\Http\Request $request) {
         abort(403);
     }
     $out = [];
-    $out[] = 'exts: pdo=' . (extension_loaded('pdo_pgsql')?1:0) . ' pgsql=' . (extension_loaded('pgsql')?1:0);
-    $out[] = 'DB=' . env('DB_CONNECTION') . ' host=' . env('DB_HOST') . ' db=' . env('DB_DATABASE') . ' endpoint=' . env('DB_NEON_ENDPOINT');
+    $run = $request->query('run', 'migrate');
     try {
-        \Illuminate\Support\Facades\Artisan::call('migrate:fresh --seed --force');
+        if ($run === 'migrate') {
+            \Illuminate\Support\Facades\Artisan::call('migrate --force');
+        } elseif ($run === 'fresh') {
+            \Illuminate\Support\Facades\Artisan::call('migrate:fresh --force');
+        } elseif ($run === 'seed') {
+            \Illuminate\Support\Facades\Artisan::call('db:seed --force');
+        } else {
+            $out[] = 'unknown run mode';
+        }
         $out[] = 'ARTISAN OUTPUT:';
         $out[] = \Illuminate\Support\Facades\Artisan::output();
     } catch (\Throwable $e) {
