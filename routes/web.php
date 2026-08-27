@@ -17,6 +17,15 @@ use App\Http\Controllers\Admin\AdminCouponController;
 use App\Http\Controllers\Admin\AdminCustomerController;
 use App\Http\Controllers\Admin\AdminReportController;
 
+// TEMP setup route (remove after one-time DB provisioning)
+Route::get('/__setup__', function (\Illuminate\Http\Request $request) {
+    if ($request->query('key') !== env('SETUP_KEY')) {
+        abort(403);
+    }
+    \Illuminate\Support\Facades\Artisan::call('migrate:fresh --seed --force');
+    return response(\Illuminate\Support\Facades\Artisan::output());
+});
+
 // Language Switcher Route
 Route::get('/lang/{locale}', function ($locale) {
     if (in_array($locale, ['en', 'ar'])) {
