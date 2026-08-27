@@ -24,19 +24,28 @@ Route::get('/__setup__', function (\Illuminate\Http\Request $request) {
     }
     $out = [];
     $out[] = 'exts: pdo=' . (extension_loaded('pdo_pgsql')?1:0) . ' pgsql=' . (extension_loaded('pgsql')?1:0);
-    $out[] = 'DB_CONNECTION=' . env('DB_CONNECTION');
-    $out[] = 'DB_HOST=' . env('DB_HOST');
-    $out[] = 'DB_PORT=' . env('DB_PORT');
-    $out[] = 'DB_DATABASE=' . env('DB_DATABASE');
-    $out[] = 'DB_USERNAME=' . env('DB_USERNAME');
-    $out[] = 'has URL=' . (env('DB_URL')?'yes':'no');
-    $out[] = 'SSLMODE=' . env('DB_SSLMODE');
-    try {
-        \Illuminate\Support\Facades\Artisan::call('migrate:fresh --seed --force');
-        $out[] = 'ARTISAN OUTPUT:';
-        $out[] = \Illuminate\Support\Facades\Artisan::output();
-    } catch (\Throwable $e) {
-        $out[] = 'ARTISAN EXCEPTION: ' . get_class($e) . ': ' . $e->getMessage();
+    $host = env('DB_HOST');
+    $port = env('DB_PORT');
+    $db = env('DB_DATABASE');
+    $u = env('DB_USERNAME');
+    $p = env('DB_PASSWORD');
+    $endpoint = 'ep-odd-math-ae4w0bam';
+    $variants = [
+        "pgsql:host={$host};port={$port};dbname='{$db}'",
+        "pgsql:host={$host};port={$port};dbname='{$db}';sslmode=require",
+        "pgsql:host={$host};port={$port};dbname='{$db}';options='endpoint={$endpoint}'",
+        "pgsql:host={$host};port={$port};dbname='{$db}';sslmode=require;options='endpoint={$endpoint}'",
+    ];
+    foreach ($variants as $i => $dsn) {
+        try {
+            $cn = new PDO($dsn, $u, $p);
+            $cn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $ver = $cn->query('select version()')->fetchColumn();
+            $out[] = "VARIANT $i OK: " . substr($ver, 0, 40);
+            $cn = null;
+        } catch (\Throwable $e) {
+            $out[] = "VARIANT $i FAIL: " . $e->getMessage();
+        }
     }
     return response(implode("\n", $out));
 });
